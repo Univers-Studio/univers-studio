@@ -101,10 +101,28 @@ section h2{font-size:1.7em;font-weight:800;text-align:center;margin:0 0 10px;col
 .result-slider .compare-label.left{left:10px}
 .result-slider .compare-label.right{right:10px}
 .result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.dl-btn{display:inline-block;padding:12px 28px;background:#059669;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:.95em;transition:all .15s}
+.dl-btn{display:inline-block;padding:12px 28px;background:#059669;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:.95em;transition:all .15s;border:none;cursor:pointer;font-family:'Inter',sans-serif}
 .dl-btn:hover{background:#047857;transform:translateY(-1px)}
 .dl-btn.secondary{background:#7c3aed}
 .dl-btn.secondary:hover{background:#6d28d9}
+
+/* ── Email modal ── */
+.email-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.email-overlay.active{display:flex}
+.email-modal{background:#fff;border-radius:20px;padding:32px 28px;max-width:420px;width:100%;box-shadow:0 12px 48px rgba(0,0,0,.2);text-align:center;position:relative}
+.email-modal h3{font-size:1.2em;margin:0 0 6px;color:#1a1a2e}
+.email-modal .modal-sub{font-size:.9em;color:#6b7280;margin:0 0 20px;line-height:1.5}
+.email-modal input[type=email]{width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;font-family:'Inter',sans-serif;font-size:1em;text-align:center;margin:0 0 12px;transition:border-color .15s}
+.email-modal input[type=email]:focus{border-color:#7c3aed;outline:none}
+.email-modal .consent{display:flex;gap:8px;align-items:flex-start;text-align:left;margin:0 0 16px;font-size:.8em;color:#6b7280;line-height:1.4}
+.email-modal .consent input[type=checkbox]{margin-top:2px;flex-shrink:0}
+.email-modal .send-btn{display:block;width:100%;padding:13px;background:#7c3aed;color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:1.05em;font-weight:700;cursor:pointer;transition:all .15s}
+.email-modal .send-btn:hover{background:#6d28d9}
+.email-modal .send-btn:disabled{opacity:.4;cursor:not-allowed}
+.email-modal .close-btn{position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.3em;cursor:pointer;color:#9ca3af;line-height:1}
+.email-modal .success-msg{display:none}
+.email-modal .success-msg.active{display:block}
+.email-modal .form-content.hidden{display:none}
 .result-info{font-size:.82em;opacity:.45;margin:10px 0 0;text-align:center}
 .quota-bar{text-align:center;font-size:.82em;color:#6b7280;margin:14px 0 0}
 .quota-bar strong{color:#7c3aed}
@@ -278,7 +296,7 @@ footer a:hover{text-decoration:underline}
         <p style="text-align:center;font-size:.8em;opacity:.45;margin:8px 0 0;font-style:italic">Drag to compare</p>
       </div>
       <div class="result-actions">
-        <a class="dl-btn" id="dlLink" href="#" download>Download Full Pack (ZIP)</a>
+        <button class="dl-btn" id="dlLink" onclick="openEmailModal()">Download Full Pack (ZIP)</button>
       </div>
       <p class="result-info" id="resultInfo"></p>
     </div>
@@ -406,6 +424,30 @@ footer a:hover{text-decoration:underline}
   </dl>
 </section>
 
+<!-- ═══ EMAIL MODAL ═══ -->
+<div class="email-overlay" id="emailOverlay">
+  <div class="email-modal">
+    <button class="close-btn" onclick="closeEmailModal()">&times;</button>
+    <div class="form-content" id="emailFormContent">
+      <h3>Get your download link</h3>
+      <p class="modal-sub">Enter your email and we'll send you the download link for your mosaic pack.</p>
+      <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="email">
+      <label class="consent">
+        <input type="checkbox" id="consentCheck">
+        I agree to receive my download link and occasional creative tips by email. You can unsubscribe anytime.
+      </label>
+      <button class="send-btn" id="sendEmailBtn" onclick="submitEmail()" disabled>Send Download Link</button>
+      <p id="emailError" style="color:#ef4444;font-size:.82em;margin:8px 0 0;display:none"></p>
+    </div>
+    <div class="success-msg" id="emailSuccess">
+      <div style="font-size:2.5em;margin:0 0 12px">📬</div>
+      <h3>Check your email!</h3>
+      <p class="modal-sub">We've sent the download link to <strong id="sentToEmail"></strong>.<br>The link expires in 1 hour.</p>
+      <button class="send-btn" onclick="closeEmailModal()" style="background:#059669">Got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ FOOTER ═══ -->
 <footer>
   <a href="/">Univers Studio</a> — AI creative tools for publishers &amp; creators<br>
@@ -441,6 +483,7 @@ var totalCounter = document.getElementById('totalCounter');
 var selectedFiles = [];
 var activePreset = null;
 var promoCode = localStorage.getItem('mosaic_promo') || '';
+var isBulkDownload = false;
 
 /* ── Promo code ── */
 function applyPromo() {
@@ -578,25 +621,21 @@ async function doGenerate() {
     var isBulk = selectedFiles.length > 1;
 
     if (isBulk) {
-      var b = _buildFormData('zip');
+      // Bulk: fetch beauty previews not possible, show placeholder
+      var b = _buildFormData('beauty');
       var resp = await fetch(API+'/api/bulk', {method:'POST', body:b.fd});
       if (!resp.ok) { var err = await resp.json(); throw new Error(err.detail?.message || err.detail || 'Generation failed'); }
-      var blob = await resp.blob();
-      dlLink.href = URL.createObjectURL(blob);
-      dlLink.download = 'mystery-mosaics-bulk.zip';
-      resultInfo.textContent = selectedFiles.length + ' mosaics generated (mystery + answer + legend each)';
+      // Just confirm generation works, ZIP will be generated on email request
+      resultInfo.textContent = selectedFiles.length + ' mosaics ready — click Download to get your ZIP via email';
       document.getElementById('resultSlider').style.display = 'none';
+      isBulkDownload = true;
     } else {
       var origUrl = URL.createObjectURL(selectedFiles[0]);
       document.getElementById('previewOriginal').src = origUrl;
 
+      // Only fetch beauty preview — ZIP will be generated when user provides email
       var fdBeauty = _buildFormData('beauty');
-      var fdZip = _buildFormData('zip');
-
-      var [beautyResp, zipResp] = await Promise.all([
-        fetch(API+'/api/generate', {method:'POST', body:fdBeauty.fd}),
-        fetch(API+'/api/generate', {method:'POST', body:fdZip.fd})
-      ]);
+      var beautyResp = await fetch(API+'/api/generate', {method:'POST', body:fdBeauty.fd});
 
       if (!beautyResp.ok) { var err = await beautyResp.json(); throw new Error(err.detail?.message || err.detail || 'Generation failed'); }
 
@@ -604,10 +643,8 @@ async function doGenerate() {
       document.getElementById('previewAnswer').src = URL.createObjectURL(beautyBlob);
       document.getElementById('resultSlider').style.display = 'block';
 
-      var zipBlob = await zipResp.blob();
-      dlLink.href = URL.createObjectURL(zipBlob);
-      dlLink.download = selectedFiles[0].name.replace(/\.[^.]+$/, '') + '-mosaic.zip';
-      resultInfo.textContent = 'ZIP includes: mystery page, answer key, and color legend — all at 300 DPI';
+      resultInfo.textContent = 'Click Download to receive the full pack (mystery + answer + legend) via email';
+      isBulkDownload = false;
     }
 
     resultDiv.classList.add('active');
@@ -645,6 +682,81 @@ _initSlider('compareSlider','compareOverlay','compareHandle','--slider-w');
 /* ── Result slider (called after generation) ── */
 function initResultSlider(){
   _initSlider('resultCompare','resultOverlay','resultHandle','--rslider-w');
+}
+
+/* ── Email modal ── */
+var emailOverlay = document.getElementById('emailOverlay');
+var emailInput = document.getElementById('emailInput');
+var consentCheck = document.getElementById('consentCheck');
+var sendEmailBtn = document.getElementById('sendEmailBtn');
+var emailError = document.getElementById('emailError');
+
+function updateSendBtn() {
+  sendEmailBtn.disabled = !(emailInput.value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/) && consentCheck.checked);
+}
+emailInput.addEventListener('input', updateSendBtn);
+consentCheck.addEventListener('change', updateSendBtn);
+
+function openEmailModal() {
+  emailOverlay.classList.add('active');
+  document.getElementById('emailFormContent').classList.remove('hidden');
+  document.getElementById('emailSuccess').classList.remove('active');
+  emailError.style.display = 'none';
+  emailInput.focus();
+}
+
+function closeEmailModal() {
+  emailOverlay.classList.remove('active');
+}
+
+emailOverlay.addEventListener('click', function(e) {
+  if (e.target === emailOverlay) closeEmailModal();
+});
+
+async function submitEmail() {
+  var email = emailInput.value.trim();
+  if (!email) return;
+
+  sendEmailBtn.disabled = true;
+  sendEmailBtn.textContent = 'Sending...';
+  emailError.style.display = 'none';
+
+  try {
+    // Build form data with image + settings + email
+    var fd = new FormData();
+    fd.append('email', email);
+    if (isBulkDownload) {
+      selectedFiles.forEach(function(f){ fd.append('images', f); });
+      fd.append('image', selectedFiles[0]); // API needs at least one as 'image'
+    } else {
+      fd.append('image', selectedFiles[0]);
+    }
+    if (activePreset) fd.append('preset', activePreset);
+    fd.append('colors', colorsRange.value);
+    fd.append('cell_size', cellRange.value);
+    fd.append('page', pageSelect.value);
+    if (promoCode) fd.append('promo_code', promoCode);
+
+    var resp = await fetch(API + '/api/request-download', {method: 'POST', body: fd});
+    if (!resp.ok) {
+      var err = await resp.json();
+      throw new Error(err.detail || 'Failed to send email');
+    }
+
+    // Show success
+    document.getElementById('sentToEmail').textContent = email;
+    document.getElementById('emailFormContent').classList.add('hidden');
+    document.getElementById('emailSuccess').classList.add('active');
+
+    // Update quota
+    fetch(API+'/api/quota').then(function(r){return r.json()}).then(function(d){quotaCount.textContent=promoCode?'\u221e':d.remaining});
+  } catch(e) {
+    emailError.textContent = e.message;
+    emailError.style.display = 'block';
+  } finally {
+    sendEmailBtn.disabled = false;
+    sendEmailBtn.textContent = 'Send Download Link';
+  }
 }
 
 /* ── Smooth scroll ── */
