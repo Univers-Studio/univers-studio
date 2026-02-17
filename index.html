@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Univers Studio — AI Creative Tools for Publishers & Creators</title>
+<meta name="description" content="Professional AI-powered creative tools for publishers, teachers, and content creators. Generate mystery mosaics, color-by-number pages, and more from any image.">
+<link rel="canonical" href="https://univers.studio/">
+<meta property="og:title" content="Univers Studio — AI Creative Tools for Publishers & Creators">
+<meta property="og:description" content="Professional AI-powered creative tools for publishers, teachers, and content creators.">
+<meta property="og:url" content="https://univers.studio/">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{font-family:'Inter',sans-serif;background:#fafafa;color:#1a1a2e}
+
+/* ── Hero ── */
+.hero{background:linear-gradient(135deg,#0f0f1a 0%,#1a1a3e 40%,#2d1b69 70%,#4a1a8a 100%);color:#fff;padding:80px 20px 72px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 30% 20%,rgba(124,58,237,.15) 0%,transparent 60%),radial-gradient(circle at 70% 80%,rgba(232,121,249,.1) 0%,transparent 50%);pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.brand{font-size:.9em;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5;margin:0 0 20px}
+.hero h1{font-size:3em;font-weight:900;margin:0 0 16px;letter-spacing:-.03em;line-height:1.1}
+.hero h1 span{background:linear-gradient(90deg,#a78bfa,#e879f9,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .subtitle{font-size:1.15em;opacity:.6;max-width:560px;margin:0 auto 36px;line-height:1.6}
+.hero-cta{display:inline-block;padding:16px 40px;background:#7c3aed;color:#fff;border:none;border-radius:14px;font-size:1.15em;font-weight:800;cursor:pointer;transition:all .2s;text-decoration:none}
+.hero-cta:hover{background:#6d28d9;transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.4)}
+.hero-sub{margin:16px 0 0;font-size:.85em;opacity:.35}
+
+/* ── Tools grid ── */
+section{max-width:960px;margin:0 auto;padding:56px 20px}
+section h2{font-size:2em;font-weight:900;text-align:center;margin:0 0 8px;letter-spacing:-.02em}
+.section-sub{text-align:center;opacity:.45;margin:0 0 40px;font-size:1em}
+
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.tool-card{background:#fff;border:2px solid #e5e7eb;border-radius:20px;overflow:hidden;transition:all .2s;text-decoration:none;color:inherit}
+.tool-card:hover{border-color:#7c3aed;transform:translateY(-4px);box-shadow:0 12px 40px rgba(124,58,237,.1)}
+.tool-card-img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.tool-card-body{padding:22px}
+.tool-card-body h3{font-size:1.15em;font-weight:800;margin:0 0 6px}
+.tool-card-body p{font-size:.88em;opacity:.55;line-height:1.6;margin:0 0 14px}
+.tool-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.badge-live{background:#ecfdf5;color:#059669}
+.badge-soon{background:#f3e8ff;color:#7c3aed}
+
+/* ── Why section ── */
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.why-item{text-align:center;padding:24px 16px}
+.why-icon{font-size:2em;margin:0 0 12px}
+.why-item h3{font-size:1em;font-weight:800;margin:0 0 6px}
+.why-item p{font-size:.85em;opacity:.5;line-height:1.6}
+
+/* ── Footer ── */
+footer{padding:32px 20px;text-align:center;font-size:.82em;color:#9ca3af;border-top:1px solid #e5e7eb;margin:20px 0 0}
+footer a{color:#7c3aed;text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+@media(max-width:700px){
+  .hero h1{font-size:2em}
+  .hero{padding:56px 20px 48px}
+  .why-grid{grid-template-columns:1fr;gap:8px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="brand">Univers Studio</div>
+  <h1>AI-Powered Tools<br>for <span>Creators</span></h1>
+  <p class="subtitle">Professional creative tools for publishers, teachers, and content creators. Generate print-ready activities from any image.</p>
+  <a class="hero-cta" href="/mosaic/">Try Mystery Mosaic Generator</a>
+  <p class="hero-sub">Free to start — no account required</p>
+</div>
+
+<!-- ═══ TOOLS ═══ -->
+<section>
+  <h2>Creative Tools</h2>
+  <p class="section-sub">Production-ready generators for your next project</p>
+
+  <div class="tools-grid">
+    <a class="tool-card" href="/mosaic/">
+      <img class="tool-card-img" src="/mosaic/hero-mosaic.png" alt="Mystery Mosaic Generator preview">
+      <div class="tool-card-body">
+        <h3>Mystery Mosaic Generator</h3>
+        <p>Transform any image into printable color-by-number mystery mosaics. Hexagonal grid or organic Voronoi cells. 300 DPI, KDP presets, bulk mode.</p>
+        <span class="tool-badge badge-live">Live</span>
+      </div>
+    </a>
+
+    <div class="tool-card" style="opacity:.6;cursor:default">
+      <div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#f3e8ff,#ede9fe);display:flex;align-items:center;justify-content:center;font-size:2.5em">🎨</div>
+      <div class="tool-card-body">
+        <h3>Color by Number Generator</h3>
+        <p>Classic numbered coloring pages from any illustration. Perfect for kids' activity books and educational content.</p>
+        <span class="tool-badge badge-soon">Coming Soon</span>
+      </div>
+    </div>
+
+    <div class="tool-card" style="opacity:.6;cursor:default">
+      <div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#ecfdf5,#d1fae5);display:flex;align-items:center;justify-content:center;font-size:2.5em">🧩</div>
+      <div class="tool-card-body">
+        <h3>Puzzle Page Generator</h3>
+        <p>Word searches, mazes, and spot-the-difference pages. Auto-generated, print-ready, customizable difficulty.</p>
+        <span class="tool-badge badge-soon">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHY UNIVERS STUDIO ═══ -->
+<section>
+  <h2>Why Univers Studio</h2>
+  <p class="section-sub">Built for people who create and publish</p>
+  <div class="why-grid">
+    <div class="why-item">
+      <div class="why-icon">🖨️</div>
+      <h3>Print-Ready Output</h3>
+      <p>300 DPI files ready for KDP, classrooms, and retail. US Letter and A4 formats.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-icon">⚡</div>
+      <h3>Instant Generation</h3>
+      <p>Upload an image, pick a preset, download. No manual work, no waiting for freelancers.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-icon">📦</div>
+      <h3>Bulk Processing</h3>
+      <p>Generate entire books in one click. Up to 50 images per batch with consistent quality.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  Univers Studio — AI creative tools for publishers &amp; creators<br>
+  <a href="/mosaic/">Mystery Mosaic</a> &middot; &copy; 2026 Univers Studio
+</footer>
+
+</body>
+</html>
