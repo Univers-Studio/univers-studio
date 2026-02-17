@@ -584,6 +584,20 @@ function handleFiles(files) {
   resultDiv.classList.remove('active');
 }
 
+/* ── Wake up API (Render free tier sleeps after inactivity) ── */
+var _apiReady = false;
+(async function wakeApi() {
+  for (var i = 0; i < 20; i++) {
+    try {
+      var r = await fetch(API + '/api/presets');
+      if (r.ok) { _apiReady = true; break; }
+    } catch(e) {}
+    await new Promise(function(ok){ setTimeout(ok, 3000); });
+  }
+})();
+/* Keep API alive while user is on page */
+setInterval(function(){ fetch(API + '/api/presets').catch(function(){}); }, 60000);
+
 /* ── Quota + Stats ── */
 fetch(API + '/api/quota').then(function(r){ return r.json(); }).then(function(d){
   quotaCount.textContent = d.remaining;
@@ -612,6 +626,20 @@ function _buildFormData(outputType) {
   return { fd: fd, isBulk: isBulk };
 }
 
+async function _fetchRetry(url, opts, retries) {
+  retries = retries || 5;
+  for (var i = 0; i < retries; i++) {
+    try {
+      var r = await fetch(url, opts);
+      if (r.status === 503 && i < retries - 1) { await new Promise(function(ok){setTimeout(ok,3000)}); continue; }
+      return r;
+    } catch(e) {
+      if (i >= retries - 1) throw e;
+      await new Promise(function(ok){setTimeout(ok,3000)});
+    }
+  }
+}
+
 async function doGenerate() {
   if (!selectedFiles.length) return;
   genBtn.disabled = true;
@@ -623,7 +651,7 @@ async function doGenerate() {
     if (isBulk) {
       // Bulk: fetch beauty previews not possible, show placeholder
       var b = _buildFormData('beauty');
-      var resp = await fetch(API+'/api/bulk', {method:'POST', body:b.fd});
+      var resp = await _fetchRetry(API+'/api/bulk', {method:'POST', body:b.fd});
       if (!resp.ok) { var err = await resp.json(); throw new Error(err.detail?.message || err.detail || 'Generation failed'); }
       // Just confirm generation works, ZIP will be generated on email request
       resultInfo.textContent = selectedFiles.length + ' mosaics ready — click Download to get your ZIP via email';
@@ -635,7 +663,7 @@ async function doGenerate() {
 
       // Only fetch beauty preview — ZIP will be generated when user provides email
       var fdBeauty = _buildFormData('beauty');
-      var beautyResp = await fetch(API+'/api/generate', {method:'POST', body:fdBeauty.fd});
+      var beautyResp = await _fetchRetry(API+'/api/generate', {method:'POST', body:fdBeauty.fd});
 
       if (!beautyResp.ok) { var err = await beautyResp.json(); throw new Error(err.detail?.message || err.detail || 'Generation failed'); }
 
@@ -737,7 +765,7 @@ async function submitEmail() {
     fd.append('page', pageSelect.value);
     if (promoCode) fd.append('promo_code', promoCode);
 
-    var resp = await fetch(API + '/api/request-download', {method: 'POST', body: fd});
+    var resp = await _fetchRetry(API + '/api/request-download', {method: 'POST', body: fd});
     if (!resp.ok) {
       var err = await resp.json();
       throw new Error(err.detail || 'Failed to send email');
